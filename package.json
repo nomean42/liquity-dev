@@ -1,6 +1,11 @@
 {
   "name": "liquity",
   "private": true,
+  "engines": {
+    "yarn": "1",
+    "node": "12",
+    "npm": "6"
+  },
   "workspaces": {
     "packages": ["packages/*"],
     "nohoist": [

@@ -5,12 +5,14 @@ import { Stability } from "../components/Stability/Stability";
 import { SystemStats } from "../components/SystemStats";
 import { PriceManager } from "../components/PriceManager";
 import { Staking } from "../components/Staking/Staking";
+import { Farm } from '../components/Farm/Farm';
 
 export const Dashboard: React.FC = () => (
   <Container variant="columns">
     <Container variant="left">
       <Trove />
       <Stability />
+      <Farm />
       <Staking />
     </Container>
 
