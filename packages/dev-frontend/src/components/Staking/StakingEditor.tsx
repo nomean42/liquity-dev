@@ -1,47 +1,121 @@
-import React, { useState } from "react";
-import { Heading, Box, Card, Button } from "theme-ui";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {Heading, Box, Card, Button, Input, ThemeUICSSProperties} from "theme-ui";
 
 import { Decimal, Decimalish, LiquityStoreState, LQTYStake } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN, GT } from "../../strings";
+import { GT } from "../../strings";
 
 import { Icon } from "../Icon";
-import { EditableRow, StaticRow } from "../Trove/Editor";
+import { Row, StaticAmounts} from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
 
 import { useStakingView } from "./context/StakingViewContext";
+import {GainsRow} from './GainsRow';
 
 const selectLQTYBalance = ({ lqtyBalance }: LiquityStoreState) => lqtyBalance;
 
 type StakingEditorProps = {
   title: string;
   originalStake: LQTYStake;
-  editedLQTY: Decimal;
+  editedLQTY: Decimalish;
   dispatch: (action: { type: "setStake"; newValue: Decimalish } | { type: "revert" }) => void;
 };
+
+const inputId = "stake-lqty";
+const unit = GT;
+const editableStyle: ThemeUICSSProperties = {
+    flexGrow: 1,
+
+    mb: [2, 3],
+    pl: 3,
+    pr: "11px",
+    pb: 2,
+    pt: "28px",
+
+    fontSize: 4,
+
+    boxShadow: [1, 2],
+    border: 1,
+    borderColor: "muted"
+};
+
+export const parseDecimalishToNumber = (decimalish: Decimalish): number => {
+    switch (typeof decimalish)  {
+        case 'number':
+            return decimalish;
+        case 'string':
+            return parseFloat(decimalish);
+        default:
+            return parseFloat(Decimal.from(decimalish).toString());
+    }
+}
+export const prettifyNumber = (num: number): string => {
+    const normalizedNumber = Math.round(num * 100) / 100;
+    const [characteristic, mantissa] = String(normalizedNumber).split(".");
+    const prettyCharacteristic = characteristic.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+
+    return mantissa !== undefined ? prettyCharacteristic + "." + mantissa + (mantissa.length === 1 ? '0' : '') : prettyCharacteristic;
+}
 
 export const StakingEditor: React.FC<StakingEditorProps> = ({
   children,
   title,
   originalStake,
-  editedLQTY,
+  editedLQTY ,
   dispatch
 }) => {
   const lqtyBalance = useLiquitySelector(selectLQTYBalance);
-  const { changePending } = useStakingView();
-  const editingState = useState<string>();
+  const { changePending, kind } = useStakingView();
+  const [ invalid, setInvalid ] = useState(false);
+  const inputComponent = useRef(null);
+  const isKindStake = kind === "STAKE";
 
-  const edited = !editedLQTY.eq(originalStake.stakedLQTY);
+  const [ editedLQTYAmount, setEditedLQTYAmount ]: [number, (newValue: number) => void] = [parseDecimalishToNumber(editedLQTY), useCallback(( newValue: Decimalish ) =>
+      dispatch({ type: "setStake", newValue }), [dispatch])]
+  const [inputAmount, setInputAmount] = useState(NaN);
 
-  const maxAmount = originalStake.stakedLQTY.add(lqtyBalance);
-  const maxedOut = editedLQTY.eq(maxAmount);
+  const maxAmount = Math.floor(parseDecimalishToNumber(isKindStake ? lqtyBalance : originalStake.stakedLQTY) * 10e5) / 10e5;
+  const maxedOut = isKindStake ? editedLQTYAmount === maxAmount : editedLQTYAmount === 0;
+
+  const onInputChange = useCallback(({target: { value } }) => {
+      const newValue = parseFloat(value);
+      const isInvalid = Number.isNaN(newValue) || newValue < 0;
+
+      setInvalid(isInvalid);
+      if (!isInvalid) {
+        setInputAmount(newValue);
+      }
+  }, [ setInputAmount, setInvalid ]);
+
+  useEffect(() => {
+      if (!Number.isNaN(inputAmount)) {
+        const stakedLQTY = parseDecimalishToNumber(originalStake.stakedLQTY);
+
+        setEditedLQTYAmount(isKindStake ? stakedLQTY + inputAmount : stakedLQTY - inputAmount);
+      }
+  }, [ inputAmount, isKindStake, originalStake.stakedLQTY, setEditedLQTYAmount ]);
+
+  useEffect(() => {
+      if (inputComponent.current) {
+          (inputComponent.current as unknown as HTMLInputElement).value = inputAmount.toString();
+      }
+  }, [ inputAmount, inputComponent ]);
+
+  useEffect(() => {
+      if (inputComponent.current) {
+          const element = inputComponent.current as unknown as HTMLInputElement;
+          element.addEventListener("mousewheel", (e) => {
+              e.preventDefault();
+          });
+      }
+  }, [ inputComponent ]);
 
   return (
     <Card>
       <Heading>
         {title}
-        {edited && !changePending && (
+        {!changePending && (
           <Button
             variant="titleIcon"
             sx={{ ":enabled:hover": { color: "danger" } }}
@@ -51,38 +125,55 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
           </Button>
         )}
       </Heading>
-
       <Box sx={{ p: [2, 3] }}>
-        <EditableRow
-          label="Stake"
-          inputId="stake-lqty"
-          amount={editedLQTY.prettify()}
-          maxAmount={maxAmount.toString()}
-          maxedOut={maxedOut}
-          unit={GT}
-          {...{ editingState }}
-          editedAmount={editedLQTY.toString(2)}
-          setEditedAmount={newValue => dispatch({ type: "setStake", newValue })}
-        />
+        <Row labelId={`${inputId}-label`} label="Stake" >
+            <StaticAmounts
+                sx={{
+                    ...editableStyle,
+                    bg: "background"
+                }}
+                labelledBy={`${inputId}-label`}
+                amount={`${originalStake.stakedLQTY.prettify()} -> ${prettifyNumber(editedLQTYAmount)}`}
+                {...{ inputId, unit, invalid }}
+            >
+                {maxAmount !== 0 && (
+                    <Button
+                        sx={{ fontSize: 1, p: 1, px: 3 }}
+                        onClick={event => {
+                            setInputAmount(maxAmount);
+                            event.stopPropagation();
+                        }}
+                        disabled={maxedOut}
+                    >
+                        max
+                    </Button>
+                )}
+            </StaticAmounts>
+        </Row>
+        <Row {...{ label: isKindStake ? "Stake" : "Withdraw", labelFor: inputId, unit }}>
+          <Input
+              ref={inputComponent}
+              lang={"en"}
+              min={0}
+              autoFocus
+              id={inputId}
+              type="number"
+              step="any"
+              onChange={onInputChange}
+              onBlur={() => {
+                setInvalid(false);
+              }}
+              sx={{
+                ...editableStyle,
+                fontWeight: "medium",
+                bg: invalid ? "invalid" : "background"
+              }}
+
+          />
+        </Row>
 
         {!originalStake.isEmpty && (
-          <>
-            <StaticRow
-              label="Redemption gain"
-              inputId="stake-gain-eth"
-              amount={originalStake.collateralGain.prettify(4)}
-              color={originalStake.collateralGain.nonZero && "success"}
-              unit="ETH"
-            />
-
-            <StaticRow
-              label="Issuance gain"
-              inputId="stake-gain-lusd"
-              amount={originalStake.lusdGain.prettify()}
-              color={originalStake.lusdGain.nonZero && "success"}
-              unit={COIN}
-            />
-          </>
+          <GainsRow lqtyStake={originalStake}/>
         )}
 
         {children}

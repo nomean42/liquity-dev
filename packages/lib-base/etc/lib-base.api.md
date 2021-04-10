@@ -313,6 +313,10 @@ export class LQTYStake {
     readonly collateralGain: Decimal;
     equals(that: LQTYStake): boolean;
     // (undocumented)
+    getStakeChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined;
+    // (undocumented)
+    getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined;
+    // (undocumented)
     get isEmpty(): boolean;
     readonly lusdGain: Decimal;
     readonly stakedLQTY: Decimal;

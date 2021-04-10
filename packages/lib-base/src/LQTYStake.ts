@@ -9,9 +9,9 @@ export type LQTYStakeChange<T> =
   | { stakeLQTY: T; unstakeLQTY?: undefined }
   | { stakeLQTY?: undefined; unstakeLQTY: T; unstakeAllLQTY: boolean };
 
-/** 
+/**
  * Represents a user's LQTY stake and accrued gains.
- * 
+ *
  * @remarks
  * Returned by the {@link ReadableLiquity.getLQTYStake | getLQTYStake()} function.
 
@@ -76,6 +76,21 @@ export class LQTYStake {
     if (thatStakedLQTY.gt(this.stakedLQTY)) {
       return { stakeLQTY: thatStakedLQTY.sub(this.stakedLQTY) };
     }
+  }
+
+  getStakeChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined {
+    const decimalDiff = Decimal.from(diffStakedLQTY);
+
+    return { stakeLQTY: this.stakedLQTY.add(decimalDiff) };
+  }
+
+  getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined {
+    const decimalDiff = Decimal.from(diffStakedLQTY);
+
+    return {
+      unstakeLQTY: this.stakedLQTY.sub(decimalDiff),
+      unstakeAllLQTY: this.stakedLQTY.eq(decimalDiff),
+    };
   }
 
   /**

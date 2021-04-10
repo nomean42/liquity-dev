@@ -1,16 +1,17 @@
-import { Heading, Box, Card, Flex, Button } from "theme-ui";
+import {Heading, Box, Card, Flex, Button } from "theme-ui";
 
 import { LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN, GT } from "../../strings";
+import { GT } from "../../strings";
 
-import { DisabledEditableRow, StaticRow } from "../Trove/Editor";
+import { DisabledEditableRow } from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
-import { Icon } from "../Icon";
 
 import { useStakingView } from "./context/StakingViewContext";
 import { StakingGainsAction } from "./StakingGainsAction";
+import React from 'react';
+import {GainsRow} from './GainsRow';
 
 const selectLQTYStake = ({ lqtyStake }: LiquityStoreState) => lqtyStake;
 
@@ -29,27 +30,13 @@ export const ReadOnlyStake: React.FC = () => {
           amount={lqtyStake.stakedLQTY.prettify()}
           unit={GT}
         />
-
-        <StaticRow
-          label="Redemption gain"
-          inputId="stake-gain-eth"
-          amount={lqtyStake.collateralGain.prettify(4)}
-          color={lqtyStake.collateralGain.nonZero && "success"}
-          unit="ETH"
-        />
-
-        <StaticRow
-          label="Issuance gain"
-          inputId="stake-gain-lusd"
-          amount={lqtyStake.lusdGain.prettify()}
-          color={lqtyStake.lusdGain.nonZero && "success"}
-          unit={COIN}
-        />
-
-        <Flex variant="layout.actions">
-          <Button variant="outline" onClick={() => dispatch({ type: "startAdjusting" })}>
-            <Icon name="pen" size="sm" />
-            &nbsp;Adjust
+        <GainsRow lqtyStake={lqtyStake}/>
+        <Flex variant="layout.actions" sx={{justifyContent: 'space-between'}}>
+          <Button variant="outline" onClick={() => dispatch({ type: "startAdjusting", kind: "STAKE" })}>
+            Stake
+          </Button>
+          <Button variant="outline" onClick={() => dispatch({ type: "startAdjusting", kind: "WITHDRAW" })}>
+            Withdraw
           </Button>
 
           <StakingGainsAction />

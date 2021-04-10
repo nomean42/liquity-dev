@@ -9,7 +9,7 @@ Represents a user's LQTY stake and accrued gains.
 <b>Signature:</b>
 
 ```typescript
-export declare class LQTYStake 
+export declare class LQTYStake
 ```
 
 ## Remarks
