@@ -1,4 +1,8 @@
-export const COIN = "LUSD";
-export const GT = "LQTY";
-export const LP = "UNI LP";
-// export const LP = "ETH/LUSD LP";
+export enum Units {
+  COIN = "LUSD",
+  GT = "LQTY",
+  LP = "UNI LP",
+  ETH = "ETH",
+  PERCENT = "%",
+  // LP="ETH/LUSD LP",
+}

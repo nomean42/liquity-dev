@@ -1,10 +1,19 @@
 import React, { useCallback, useEffect } from "react";
 import { Button, Flex } from "theme-ui";
 
-import { Decimal, Decimalish, LiquityStoreState } from "@liquity/lib-base";
-import { LiquityStoreUpdate, useLiquityReducer, useLiquitySelector } from "@liquity/lib-react";
+import {
+  Decimal,
+  Decimalish,
+  LiquityStoreState,
+  StabilityDeposit,
+} from "@liquity/lib-base";
+import {
+  LiquityStoreUpdate,
+  useLiquityReducer,
+  useLiquitySelector,
+} from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { Units } from "../../strings";
 
 import { ActionDescription } from "../ActionDescription";
 import { useMyTransactionState } from "../Transaction";
@@ -14,19 +23,31 @@ import { StabilityDepositAction } from "./StabilityDepositAction";
 import { useStabilityView } from "./context/StabilityViewContext";
 import {
   selectForStabilityDepositChangeValidation,
-  validateStabilityDepositChange
+  validateStabilityDepositChange,
 } from "./validation/validateStabilityDepositChange";
 
-const init = ({ stabilityDeposit }: LiquityStoreState) => ({
+interface StabilityDepositManagerState {
+  originalDeposit: StabilityDeposit;
+  editedLUSD: Decimal;
+  changePending: boolean;
+  kind?: StabilityDepositKind;
+}
+
+const init = ({
+  stabilityDeposit,
+}: LiquityStoreState): StabilityDepositManagerState => ({
   originalDeposit: stabilityDeposit,
-  editedLUSD: stabilityDeposit.currentLUSD,
-  changePending: false
+  editedLUSD: Decimal.ZERO,
+  changePending: false,
 });
 
-type StabilityDepositManagerState = ReturnType<typeof init>;
+export type StabilityDepositKind = "DEPOSIT" | "WITHDRAW";
 type StabilityDepositManagerAction =
   | LiquityStoreUpdate
-  | { type: "startChange" | "finishChange" | "revert" }
+  | {
+      type: "startChange" | "finishChange" | "revert";
+      kind?: StabilityDepositKind;
+    }
   | { type: "setDeposit"; newValue: Decimalish };
 
 const reduceWith = (action: StabilityDepositManagerAction) => (
@@ -40,15 +61,11 @@ const reduce = (
   state: StabilityDepositManagerState,
   action: StabilityDepositManagerAction
 ): StabilityDepositManagerState => {
-  // console.log(state);
-  // console.log(action);
-
   const { originalDeposit, editedLUSD, changePending } = state;
 
   switch (action.type) {
     case "startChange": {
-      console.log("changeStarted");
-      return { ...state, changePending: true };
+      return { ...state, changePending: true, kind: action.kind };
     }
 
     case "finishChange":
@@ -62,7 +79,7 @@ const reduce = (
 
     case "updateStore": {
       const {
-        stateChange: { stabilityDeposit: updatedDeposit }
+        stateChange: { stabilityDeposit: updatedDeposit },
       } = action;
 
       if (!updatedDeposit) {
@@ -83,7 +100,9 @@ const reduce = (
 
       return {
         ...newState,
-        editedLUSD: updatedDeposit.apply(originalDeposit.whatChanged(editedLUSD))
+        editedLUSD: updatedDeposit.apply(
+          originalDeposit.whatChanged(editedLUSD)
+        ),
       };
     }
   }
@@ -92,18 +111,25 @@ const reduce = (
 const transactionId = "stability-deposit";
 
 export const StabilityDepositManager: React.FC = () => {
-  const [{ originalDeposit, editedLUSD, changePending }, dispatch] = useLiquityReducer(reduce, init);
-  const validationContext = useLiquitySelector(selectForStabilityDepositChangeValidation);
-  const { dispatchEvent } = useStabilityView();
+  const [
+    { originalDeposit, editedLUSD, changePending },
+    dispatch,
+  ] = useLiquityReducer(reduce, init);
+  const validationContext = useLiquitySelector(
+    selectForStabilityDepositChangeValidation
+  );
+  const { dispatchEvent, kind } = useStabilityView();
 
   const handleCancel = useCallback(() => {
     dispatchEvent("CANCEL_PRESSED");
   }, [dispatchEvent]);
 
+  const isKindStake = kind === "DEPOSIT";
   const [validChange, description] = validateStabilityDepositChange(
     originalDeposit,
     editedLUSD,
-    validationContext
+    validationContext,
+    isKindStake
   );
 
   const makingNewDeposit = originalDeposit.isEmpty;
@@ -116,25 +142,39 @@ export const StabilityDepositManager: React.FC = () => {
       myTransactionState.type === "waitingForConfirmation"
     ) {
       dispatch({ type: "startChange" });
-    } else if (myTransactionState.type === "failed" || myTransactionState.type === "cancelled") {
+    } else if (
+      myTransactionState.type === "failed" ||
+      myTransactionState.type === "cancelled"
+    ) {
       dispatch({ type: "finishChange" });
     } else if (myTransactionState.type === "confirmedOneShot") {
       dispatchEvent("DEPOSIT_CONFIRMED");
     }
   }, [myTransactionState.type, dispatch, dispatchEvent]);
 
+  const editedLUSDNormalized = isKindStake
+    ? originalDeposit.currentLUSD.add(editedLUSD)
+    : editedLUSD.gte(originalDeposit.currentLUSD)
+    ? Decimal.ZERO
+    : originalDeposit.currentLUSD.sub(editedLUSD);
+
   return (
     <StabilityDepositEditor
       originalDeposit={originalDeposit}
-      editedLUSD={editedLUSD}
+      editedLUSD={editedLUSDNormalized}
       changePending={changePending}
       dispatch={dispatch}
+      isKindStake={isKindStake}
     >
       {description ??
         (makingNewDeposit ? (
-          <ActionDescription>Enter the amount of {COIN} you'd like to deposit.</ActionDescription>
+          <ActionDescription>
+            Enter the amount of {Units.COIN} you'd like to deposit.
+          </ActionDescription>
         ) : (
-          <ActionDescription>Adjust the {COIN} amount to deposit or withdraw.</ActionDescription>
+          <ActionDescription>
+            Adjust the {Units.COIN} amount to deposit or withdraw.
+          </ActionDescription>
         ))}
 
       <Flex variant="layout.actions">
@@ -143,7 +183,10 @@ export const StabilityDepositManager: React.FC = () => {
         </Button>
 
         {validChange ? (
-          <StabilityDepositAction transactionId={transactionId} change={validChange}>
+          <StabilityDepositAction
+            transactionId={transactionId}
+            change={validChange}
+          >
             Confirm
           </StabilityDepositAction>
         ) : (
