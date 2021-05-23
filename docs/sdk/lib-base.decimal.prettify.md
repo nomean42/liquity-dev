@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-prettify(precision?: number): string;
+prettify(precision?: number, save?: boolean): string;
 ```
 
 ## Parameters
@@ -15,6 +15,7 @@ prettify(precision?: number): string;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  precision | number |  |
+|  save | boolean |  |
 
 <b>Returns:</b>
 

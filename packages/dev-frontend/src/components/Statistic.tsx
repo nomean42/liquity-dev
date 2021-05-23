@@ -4,7 +4,7 @@ import { InfoIcon } from "./InfoIcon";
 import { Units } from "../strings";
 
 type StatisticProps = {
-  name: Units | string;
+  name: Units | string | React.ReactNode;
   tooltip?: React.ReactNode;
 };
 

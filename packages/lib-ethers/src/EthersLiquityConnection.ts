@@ -17,7 +17,7 @@ import {
   _connectToContracts,
   _LiquityContractAddresses,
   _LiquityContracts,
-  _LiquityDeploymentJSON
+  _LiquityDeploymentJSON,
 } from "./contracts";
 
 import { _connectToMulticall, _Multicall } from "./_Multicall";
@@ -33,7 +33,7 @@ const deployments: {
   [goerli.chainId]: goerli,
   [kovan.chainId]: kovan,
 
-  ...(dev !== null ? { [dev.chainId]: dev } : {})
+  ...(dev !== null ? { [dev.chainId]: dev } : {}),
 };
 
 declare const brand: unique symbol;
@@ -50,7 +50,8 @@ const branded = <T>(t: Omit<T, typeof brand>): T => t as T;
  *
  * @public
  */
-export interface EthersLiquityConnection extends EthersLiquityConnectionOptionalParams {
+export interface EthersLiquityConnection
+  extends EthersLiquityConnectionOptionalParams {
   /** Ethers `Provider` used for connecting to the network. */
   readonly provider: EthersProvider;
 
@@ -72,6 +73,9 @@ export interface EthersLiquityConnection extends EthersLiquityConnectionOptional
   /** Total amount of LQTY allocated for rewarding stability depositors. */
   readonly totalStabilityPoolLQTYReward: Decimal;
 
+  /** Amount of LQTY collectively rewarded to stakers of the liquidity mining pool per second. */
+  readonly liquidityMiningLQTYRewardRate: Decimal;
+
   /** A mapping of Liquity contracts' names to their addresses. */
   readonly addresses: Record<string, string>;
 
@@ -86,7 +90,8 @@ export interface EthersLiquityConnection extends EthersLiquityConnectionOptional
 }
 
 /** @internal */
-export interface _InternalEthersLiquityConnection extends EthersLiquityConnection {
+export interface _InternalEthersLiquityConnection
+  extends EthersLiquityConnection {
   readonly addresses: _LiquityContractAddresses;
   readonly _contracts: _LiquityContracts;
   readonly _multicall?: _Multicall;
@@ -97,7 +102,12 @@ const connectionFrom = (
   signer: EthersSigner | undefined,
   _contracts: _LiquityContracts,
   _multicall: _Multicall | undefined,
-  { deploymentDate, totalStabilityPoolLQTYReward, ...deployment }: _LiquityDeploymentJSON,
+  {
+    deploymentDate,
+    totalStabilityPoolLQTYReward,
+    liquidityMiningLQTYRewardRate,
+    ...deployment
+  }: _LiquityDeploymentJSON,
   optionalParams?: EthersLiquityConnectionOptionalParams
 ): _InternalEthersLiquityConnection => {
   if (
@@ -115,16 +125,21 @@ const connectionFrom = (
     _multicall,
     deploymentDate: new Date(deploymentDate),
     totalStabilityPoolLQTYReward: Decimal.from(totalStabilityPoolLQTYReward),
+    liquidityMiningLQTYRewardRate: Decimal.from(liquidityMiningLQTYRewardRate),
     ...deployment,
-    ...optionalParams
+    ...optionalParams,
   });
 };
 
 /** @internal */
-export const _getContracts = (connection: EthersLiquityConnection): _LiquityContracts =>
+export const _getContracts = (
+  connection: EthersLiquityConnection
+): _LiquityContracts =>
   (connection as _InternalEthersLiquityConnection)._contracts;
 
-const getMulticall = (connection: EthersLiquityConnection): _Multicall | undefined =>
+const getMulticall = (
+  connection: EthersLiquityConnection
+): _Multicall | undefined =>
   (connection as _InternalEthersLiquityConnection)._multicall;
 
 const numberify = (bigNumber: BigNumber) => bigNumber.toNumber();
@@ -137,7 +152,9 @@ export const _getBlockTimestamp = (
   blockTag: BlockTag = "latest"
 ): Promise<number> =>
   // Get the timestamp via a contract call whenever possible, to make it batchable with other calls
-  getMulticall(connection)?.getCurrentBlockTimestamp({ blockTag }).then(numberify) ??
+  getMulticall(connection)
+    ?.getCurrentBlockTimestamp({ blockTag })
+    .then(numberify) ??
   _getProvider(connection).getBlock(blockTag).then(getTimestampFromBlock);
 
 const panic = <T>(e: unknown): T => {
@@ -145,12 +162,15 @@ const panic = <T>(e: unknown): T => {
 };
 
 /** @internal */
-export const _requireSigner = (connection: EthersLiquityConnection): EthersSigner =>
+export const _requireSigner = (
+  connection: EthersLiquityConnection
+): EthersSigner =>
   connection.signer ?? panic(new Error("Must be connected through a Signer"));
 
 /** @internal */
-export const _getProvider = (connection: EthersLiquityConnection): EthersProvider =>
-  connection.provider;
+export const _getProvider = (
+  connection: EthersLiquityConnection
+): EthersProvider => connection.provider;
 
 // TODO parameterize error message?
 /** @internal */
@@ -158,17 +178,22 @@ export const _requireAddress = (
   connection: EthersLiquityConnection,
   overrides?: { from?: string }
 ): string =>
-  overrides?.from ?? connection.userAddress ?? panic(new Error("A user address is required"));
+  overrides?.from ??
+  connection.userAddress ??
+  panic(new Error("A user address is required"));
 
 /** @internal */
-export const _requireFrontendAddress = (connection: EthersLiquityConnection): string =>
+export const _requireFrontendAddress = (
+  connection: EthersLiquityConnection
+): string =>
   connection.frontendTag ?? panic(new Error("A frontend address is required"));
 
 /** @internal */
 export const _usingStore = (
   connection: EthersLiquityConnection
-): connection is EthersLiquityConnection & { useStore: EthersLiquityStoreOption } =>
-  connection.useStore !== undefined;
+): connection is EthersLiquityConnection & {
+  useStore: EthersLiquityStoreOption;
+} => connection.useStore !== undefined;
 
 /**
  * Thrown when trying to connect to a network where Liquity is not deployed.
@@ -194,10 +219,13 @@ const getProviderAndSigner = (
   signerOrProvider: EthersSigner | EthersProvider
 ): [provider: EthersProvider, signer: EthersSigner | undefined] => {
   const provider: EthersProvider = Signer.isSigner(signerOrProvider)
-    ? signerOrProvider.provider ?? panic(new Error("Signer must have a Provider"))
+    ? signerOrProvider.provider ??
+      panic(new Error("Signer must have a Provider"))
     : signerOrProvider;
 
-  const signer = Signer.isSigner(signerOrProvider) ? signerOrProvider : undefined;
+  const signer = Signer.isSigner(signerOrProvider)
+    ? signerOrProvider
+    : undefined;
 
   return [provider, signer];
 };
@@ -322,14 +350,21 @@ export const _connect = async (
 
   if (signer) {
     if (optionalParams?.userAddress !== undefined) {
-      throw new Error("Can't override userAddress when connecting through Signer");
+      throw new Error(
+        "Can't override userAddress when connecting through Signer"
+      );
     }
 
     optionalParams = {
       ...optionalParams,
-      userAddress: await signer.getAddress()
+      userAddress: await signer.getAddress(),
     };
   }
 
-  return _connectByChainId(provider, signer, (await provider.getNetwork()).chainId, optionalParams);
+  return _connectByChainId(
+    provider,
+    signer,
+    (await provider.getNetwork()).chainId,
+    optionalParams
+  );
 };

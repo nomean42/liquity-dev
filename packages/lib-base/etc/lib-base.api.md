@@ -136,13 +136,13 @@ export class Decimal {
     // (undocumented)
     pow(exponent: number): Decimal;
     // (undocumented)
-    prettify(precision?: number): string;
+    prettify(precision?: number, save?: boolean): string;
     // (undocumented)
     shorten(): string;
     // (undocumented)
     sub(subtrahend: Decimalish): Decimal;
     // (undocumented)
-    toString(precision?: number): string;
+    toString(precision?: number, save?: boolean): string;
     // (undocumented)
     static readonly ZERO: Decimal;
     // (undocumented)

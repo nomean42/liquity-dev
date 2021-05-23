@@ -98,7 +98,7 @@ export const RedemptionManager: React.FC = () => {
   return (
     <Card>
       <Heading>
-        Redemption
+        Redeem
         {dirty && !changePending && (
           <Button
             variant="titleIcon"

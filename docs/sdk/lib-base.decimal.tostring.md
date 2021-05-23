@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-toString(precision?: number): string;
+toString(precision?: number, save?: boolean): string;
 ```
 
 ## Parameters
@@ -15,6 +15,7 @@ toString(precision?: number): string;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  precision | number |  |
+|  save | boolean |  |
 
 <b>Returns:</b>
 

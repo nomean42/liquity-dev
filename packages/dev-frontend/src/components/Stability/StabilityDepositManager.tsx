@@ -97,7 +97,7 @@ const reduce = (
       if (changePending && changeCommitted) {
         return finishChange(revert(newState));
       }
-
+      //TODO editedLUSD: editedLUSD??
       return {
         ...newState,
         editedLUSD: updatedDeposit.apply(

@@ -154,8 +154,8 @@ export const StakingManager: React.FC = () => {
           } exceeds your ${isKindStake ? "balance" : "stake"} by `}
           <Amount>
             {Difference.between(
-              stakedLQTY,
-              editedLQTY
+              editedLQTY,
+              isKindStake ? lqtyBalance : stakedLQTY
             )?.absoluteValue?.prettify()}{" "}
             {Units.GT}
           </Amount>

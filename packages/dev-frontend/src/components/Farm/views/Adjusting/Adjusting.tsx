@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Heading, Box, Flex, Card, Button } from "theme-ui";
-import { Decimal, LiquityStoreState } from "@liquity/lib-base";
+import { Decimal, Difference, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { Units } from "../../../../strings";
@@ -18,10 +18,12 @@ const selector = ({
   liquidityMiningStake,
   liquidityMiningLQTYReward,
   uniTokenBalance,
+  totalStakedUniTokens
 }: LiquityStoreState) => ({
   liquidityMiningStake,
   liquidityMiningLQTYReward,
   uniTokenBalance,
+  totalStakedUniTokens
 });
 
 const transactionId = /farm-/;
@@ -32,6 +34,7 @@ export const Adjusting: React.FC = () => {
     liquidityMiningStake,
     liquidityMiningLQTYReward,
     uniTokenBalance,
+    totalStakedUniTokens
   } = useLiquitySelector(selector);
   const [amount, setAmount] = useState<Decimal>(liquidityMiningStake);
   const editingState = useState<string>();
@@ -47,6 +50,16 @@ export const Adjusting: React.FC = () => {
   const handleCancelPressed = useCallback(() => {
     dispatchEvent("CANCEL_PRESSED");
   }, [dispatchEvent]);
+
+  const nextTotalStakedUniTokens = isDirty
+    ? totalStakedUniTokens.sub(liquidityMiningStake).add(amount)
+    : totalStakedUniTokens;
+
+  const originalPoolShare = liquidityMiningStake.mulDiv(100, totalStakedUniTokens);
+  const poolShare = amount.mulDiv(100, nextTotalStakedUniTokens);
+
+  const poolShareChange =
+    liquidityMiningStake.nonZero && Difference.between(poolShare, originalPoolShare).nonZero;
 
   return (
     <Card>
@@ -77,6 +90,19 @@ export const Adjusting: React.FC = () => {
           maxAmount={maximumAmount.toString()}
           maxedOut={hasSetMaximumAmount}
         ></EditableRow>
+
+        {poolShare.infinite ? (
+          <StaticRow label="Pool share" inputId="farm-share" amount="N/A" />
+        ) : (
+          <StaticRow
+            label="Pool share"
+            inputId="farm-share"
+            amount={poolShare.prettify(4)}
+            unit="%"
+            pendingAmount={poolShareChange?.prettify(4).concat("%")}
+            pendingColor={poolShareChange?.positive ? "success" : "danger"}
+          />
+        )}
 
         <StaticRow
           label="Reward"

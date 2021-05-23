@@ -5,22 +5,31 @@ import {
   PriceChange,
   TroveChange,
   StabilityDepositChange,
-  CollSurplusChange
+  CollSurplusChange,
 } from "../../generated/schema";
 
-import { decimalize, DECIMAL_INITIAL_PRICE, DECIMAL_ZERO, DECIMAL_ONE } from "../utils/bignumbers";
+import {
+  decimalize,
+  DECIMAL_INITIAL_PRICE,
+  DECIMAL_ZERO,
+  DECIMAL_ONE,
+} from "../utils/bignumbers";
 import { calculateCollateralRatio } from "../utils/collateralRatio";
 
 import {
   isBorrowerOperation,
   isRedemption,
   isLiquidation,
-  isRecoveryModeLiquidation
+  isRecoveryModeLiquidation,
 } from "../types/TroveOperation";
 
 import { getPrice } from "../calls/PriceFeed";
 
-import { getGlobal, getSystemStateSequenceNumber, getPriceFeedAddress } from "./Global";
+import {
+  getGlobal,
+  getSystemStateSequenceNumber,
+  getPriceFeedAddress,
+} from "./Global";
 import { beginChange, initChange, finishChange } from "./Change";
 
 export function getCurrentSystemState(): SystemState {
@@ -114,7 +123,8 @@ function tryToOffsetWithTokensFromStabilityPool(
   } else if (systemState.tokensInStabilityPool > DECIMAL_ZERO) {
     // Partially offset, emptying the pool
     systemState.totalCollateral -=
-      (collateralToLiquidate * systemState.tokensInStabilityPool) / debtToLiquidate;
+      (collateralToLiquidate * systemState.tokensInStabilityPool) /
+      debtToLiquidate;
     systemState.totalDebt -= systemState.tokensInStabilityPool;
     systemState.tokensInStabilityPool = DECIMAL_ZERO;
   } else {
@@ -131,7 +141,10 @@ export function updateSystemStateByTroveChange(troveChange: TroveChange): void {
     systemState.totalDebt += troveChange.debtChange;
   } else if (isLiquidation(operation)) {
     // TODO gas compensation
-    if (!isRecoveryModeLiquidation(operation) || troveChange.collateralRatioBefore > DECIMAL_ONE) {
+    if (
+      !isRecoveryModeLiquidation(operation) ||
+      troveChange.collateralRatioBefore > DECIMAL_ONE
+    ) {
       tryToOffsetWithTokensFromStabilityPool(
         systemState,
         -troveChange.collateralChange,
@@ -156,7 +169,8 @@ export function updateSystemStateByStabilityDepositChange(
   let operation = stabilityDepositChange.stabilityDepositOperation;
 
   if (operation == "depositTokens" || operation == "withdrawTokens") {
-    systemState.tokensInStabilityPool += stabilityDepositChange.depositedAmountChange;
+    systemState.tokensInStabilityPool +=
+      stabilityDepositChange.depositedAmountChange;
   }
 
   bumpSystemState(systemState);

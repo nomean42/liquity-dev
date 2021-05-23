@@ -337,7 +337,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                             color={
                               collateralRatio.gt(CRITICAL_COLLATERAL_RATIO)
                                 ? "success"
-                                : collateralRatio.gt(MINIMUM_COLLATERAL_RATIO)
+                                : collateralRatio.gt(1.2)
                                 ? "warning"
                                 : "danger"
                             }

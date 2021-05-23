@@ -86,7 +86,7 @@ export type StaticAmountsProps = {
   inputId: string;
   labelledBy?: string;
   amount: string | React.ReactNode;
-  unit?: Units;
+  unit?: Units | string;
   color?: string;
   pendingAmount?: string;
   pendingColor?: string;
@@ -147,6 +147,8 @@ export const StaticAmounts: React.FC<StaticAmountsProps & SxProp> = ({
 };
 
 const staticStyle: ThemeUICSSProperties = {
+  flexGrow: 1,
+
   mb: 0,
   pl: 3,
   pr: "11px",
@@ -243,7 +245,7 @@ export const EditableRow: React.FC<EditableRowProps> = ({
   const [invalid, setInvalid] = useState(false);
 
   return editing === inputId ? (
-    <Row {...{ label, labelFor: inputId }}>
+    <Row {...{ label, labelFor: inputId, unit }}>
       <Input
         autoFocus
         id={inputId}
