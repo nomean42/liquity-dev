@@ -15,14 +15,14 @@ import { TroveAction } from "./TroveAction";
 import { useTroveView } from "./context/TroveViewContext";
 import { Units } from "../../strings";
 import { Icon } from "../Icon";
-import { InfoIcon } from "../InfoIcon";
 import { LoadingOverlay } from "../LoadingOverlay";
-import { CollateralRatio } from "./CollateralRatio";
-import { EditableRow, StaticRow } from "./Editor";
+import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
+import { EditableRow } from "./Editor";
 import {
   selectForTroveChangeValidation,
   validateTroveChange,
 } from "./validation/validateTroveChange";
+import { TroveInfoLine } from "./TroveInfoLine";
 
 const selector = (state: LiquityStoreState) => {
   const { fees, price, accountBalance } = state;
@@ -134,71 +134,13 @@ export const Opening: React.FC = () => {
             setBorrowAmount(Decimal.from(amount))
           }
         />
-
-        <StaticRow
-          label="Liquidation Reserve"
-          inputId="trove-liquidation-reserve"
-          amount={`${LUSD_LIQUIDATION_RESERVE}`}
-          unit={Units.COIN}
-          infoIcon={
-            <InfoIcon
-              tooltip={
-                <Card variant="tooltip" sx={{ width: "200px" }}>
-                  An amount set aside to cover the liquidator’s gas costs if
-                  your Trove needs to be liquidated. The amount increases your
-                  debt and is refunded if you close your Trove by fully paying
-                  off its net debt.
-                </Card>
-              }
-            />
-          }
+        <TroveInfoLine
+          fee={fee}
+          totalDebt={totalDebt}
+          isDirty={isDirty}
+          borrowingRate={feePct.toString(2)}
         />
-
-        <StaticRow
-          label="Borrowing Fee"
-          inputId="trove-borrowing-fee"
-          amount={fee.prettify(2)}
-          pendingAmount={feePct.toString(2)}
-          unit={Units.COIN}
-          infoIcon={
-            <InfoIcon
-              tooltip={
-                <Card variant="tooltip" sx={{ width: "240px" }}>
-                  This amount is deducted from the borrowed amount as a one-time
-                  fee. There are no recurring fees for borrowing, which is thus
-                  interest-free.
-                </Card>
-              }
-            />
-          }
-        />
-
-        <StaticRow
-          label="Total debt"
-          inputId="trove-total-debt"
-          amount={totalDebt.prettify(2)}
-          unit={Units.COIN}
-          infoIcon={
-            <InfoIcon
-              tooltip={
-                <Card variant="tooltip" sx={{ width: "240px" }}>
-                  The total amount of LUSD your Trove will hold.{" "}
-                  {isDirty && (
-                    <>
-                      You will need to repay{" "}
-                      {totalDebt.sub(LUSD_LIQUIDATION_RESERVE).prettify(2)} LUSD
-                      to reclaim your collateral (
-                      {LUSD_LIQUIDATION_RESERVE.toString()} LUSD Liquidation
-                      Reserve excluded).
-                    </>
-                  )}
-                </Card>
-              }
-            />
-          }
-        />
-
-        <CollateralRatio value={collateralRatio} />
+        <CollateralRatioInfoLine value={collateralRatio} />
 
         {description ?? (
           <ActionDescription>

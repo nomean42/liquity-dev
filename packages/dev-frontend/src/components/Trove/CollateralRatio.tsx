@@ -69,12 +69,7 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({
           }
         />
       </Flex>
-      {value?.lt(1.5) && (
-        <ActionDescription>
-          Keeping your CR above 150% can help avoid liquidation under Recovery
-          Mode.
-        </ActionDescription>
-      )}
+
     </>
   );
 };

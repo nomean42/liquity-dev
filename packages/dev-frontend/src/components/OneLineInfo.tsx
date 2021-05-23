@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Flex, Label } from "theme-ui";
 import { StaticAmounts, StaticAmountsProps } from "./Trove/Editor";
-import {InfoIconProps} from "./InfoIcon";
+import { InfoIconProps } from "./InfoIcon";
 
 export interface IInfoConfig extends StaticAmountsProps {
   title: React.ReactNode | string;
@@ -9,7 +9,7 @@ export interface IInfoConfig extends StaticAmountsProps {
 }
 
 interface IProps {
-  infoElements: IInfoConfig[];
+  infoElements: (IInfoConfig | React.ReactElement)[];
 }
 
 const createInfoTitleElement = (
@@ -38,11 +38,22 @@ const createInfoAmountElement = (
 
 export const OneLineInfo: React.FC<IProps> = ({ infoElements }) => (
   <Flex sx={{ p: 0, justifyContent: "space-between", alignItems: "center" }}>
-    {infoElements.map(({ title, infoIcon, ...staticAmountProps }) => (
-      <Box key={title?.toString()} sx={{ px: 2 }}>
-        {createInfoTitleElement(title, infoIcon)}
-        {createInfoAmountElement(staticAmountProps)}
-      </Box>
-    ))}
+    {infoElements.map((infoElement) => {
+      if (React.isValidElement(infoElement)) {
+        return (
+          <Box key={infoElement.key} sx={{ px: 2 }}>
+            {infoElement}
+          </Box>
+        );
+      }
+
+      const { title, infoIcon, ...staticAmountProps } = infoElement;
+      return (
+        <Box key={title?.toString()} sx={{ px: 2 }}>
+          {createInfoTitleElement(title, infoIcon)}
+          {createInfoAmountElement(staticAmountProps)}
+        </Box>
+      );
+    })}
   </Flex>
 );

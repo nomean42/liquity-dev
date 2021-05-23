@@ -361,7 +361,7 @@ const theme: Theme = {
 
     main: {
       width: "100%",
-      maxWidth: "912px",
+      maxWidth: "1012px",
       mx: "auto",
       mt: ["40px", 0],
       mb: ["40px", "40px"],

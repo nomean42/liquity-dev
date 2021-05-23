@@ -16,7 +16,7 @@ import { Units } from "../../strings";
 
 import { StaticRow } from "./Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
-import { CollateralRatio } from "./CollateralRatio";
+import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
 import { InfoIcon } from "../InfoIcon";
 
 type TroveEditorProps = {
@@ -116,7 +116,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           }
         />
 
-        <CollateralRatio
+        <CollateralRatioInfoLine
           value={collateralRatio}
           change={collateralRatioChange}
         />
