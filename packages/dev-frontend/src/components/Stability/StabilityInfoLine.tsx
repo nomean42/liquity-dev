@@ -11,12 +11,8 @@ interface IProps {
   editedLUSD?: Decimal;
 }
 
-const selectLUSDBalance = ({
-  lusdBalance,
+const selectLUSDBalance = ({ stabilityDeposit }: LiquityStoreState) => ({
   stabilityDeposit,
-}: LiquityStoreState) => ({
-  stabilityDeposit,
-  lusdBalance,
 });
 
 const poolShareSelector = ({
@@ -28,14 +24,12 @@ const poolShareSelector = ({
 });
 
 export const StabilityInfoLine: React.FC<IProps> = ({ editedLUSD }) => {
-  const { lusdBalance, stabilityDeposit } = useLiquitySelector(
-    selectLUSDBalance
-  );
+  const { stabilityDeposit } = useLiquitySelector(selectLUSDBalance);
 
   const poolShareInfo = usePoolShareInfo(
     poolShareSelector,
     editedLUSD,
-    !lusdBalance.isZero,
+    !stabilityDeposit.initialLUSD.isZero,
     "deposit-share"
   );
 
