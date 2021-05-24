@@ -14,7 +14,7 @@ export const Statistic: React.FC<StatisticProps> = ({
   children,
 }) => {
   return (
-    <Flex sx={{ borderBottom: 1, borderColor: "rgba(0, 0, 0, 0.1)" }}>
+    <Flex sx={{ borderBottom: 1, borderColor: "infoBorder" }}>
       <Flex
         sx={{
           alignItems: "center",

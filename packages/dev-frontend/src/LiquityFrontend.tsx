@@ -20,6 +20,7 @@ import { TroveViewProvider } from "./components/Trove/context/TroveViewProvider"
 import { StabilityViewProvider } from "./components/Stability/context/StabilityViewProvider";
 import { StakingViewProvider } from "./components/Staking/context/StakingViewProvider";
 import { FarmViewProvider } from "./components/Farm/context/FarmViewProvider";
+import ThemeButton from "./components/ThemeButton";
 
 type LiquityFrontendProps = {
   loader?: React.ReactNode;
@@ -35,7 +36,7 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
     Trove,
     Decimal,
     Difference,
-    Wallet
+    Wallet,
   });
 
   return (
@@ -49,6 +50,7 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                   <Header>
                     <UserAccount />
                     <SystemStatsPopup />
+                    <ThemeButton />
                   </Header>
 
                   <Container
@@ -57,7 +59,7 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                       display: "flex",
                       flexGrow: 1,
                       flexDirection: "column",
-                      alignItems: "center"
+                      alignItems: "center",
                     }}
                   >
                     <Switch>
