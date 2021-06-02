@@ -1,4 +1,4 @@
-import { Decimal, Decimalish } from "./Decimal";
+import { Decimal, Decimalish, Difference } from "./Decimal";
 
 /**
  * Represents the change between two states of an LQTY Stake.
@@ -89,13 +89,16 @@ export class LQTYStake {
   }
 
   getStakeChange(diffStakedLQTY: Decimal): LQTYStakeChange<Decimal> {
-    return { stakeLQTY: this.stakedLQTY.add(diffStakedLQTY) };
+    return { stakeLQTY: diffStakedLQTY };
   }
 
   getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> {
     return {
-      unstakeLQTY: this.stakedLQTY.sub(diffStakedLQTY),
-      unstakeAllLQTY: this.stakedLQTY.eq(diffStakedLQTY),
+      unstakeLQTY: Decimal.from(diffStakedLQTY),
+      unstakeAllLQTY: !!Difference.between(
+        this.stakedLQTY,
+        diffStakedLQTY
+      ).absoluteValue?.lt(Decimal.from(0.01)),
     };
   }
 

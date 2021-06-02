@@ -1,4 +1,4 @@
-import { Decimal, Decimalish } from "./Decimal";
+import { Decimal, Decimalish, Difference } from "./Decimal";
 
 /**
  * Represents the change between two Stability Deposit states.
@@ -122,8 +122,11 @@ export class StabilityDeposit {
   ): StabilityDepositChange<Decimal> | undefined {
     thatLUSD = Decimal.from(thatLUSD);
     return {
-      withdrawLUSD: this.currentLUSD.sub(thatLUSD),
-      withdrawAllLUSD: thatLUSD.isZero,
+      withdrawLUSD: thatLUSD,
+      withdrawAllLUSD: !!Difference.between(
+        this.currentLUSD,
+        thatLUSD
+      ).absoluteValue?.lt(Decimal.from(0.01)),
     };
   }
 
