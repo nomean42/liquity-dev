@@ -9,7 +9,10 @@ type StakingActionProps = {
   change: LQTYStakeChange<Decimal>;
 };
 
-export const StakingManagerAction: React.FC<StakingActionProps> = ({ change, children }) => {
+export const StakingManagerAction: React.FC<StakingActionProps> = ({
+  change,
+  children,
+}) => {
   const { liquity } = useLiquity();
 
   const [sendTransaction] = useTransactionFunction(
