@@ -65,7 +65,7 @@ const colors = {
       lightDanger: darkColors.lightLightRed,
       dangerHover: darkColors.lightRed,
       info: darkColors.blue,
-      invalid: darkColors.lightLightRed,
+      invalid: "#4d2d40",
 
       text: "#aab8bf",
       buttonText: "black",
