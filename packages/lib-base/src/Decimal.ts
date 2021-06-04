@@ -138,7 +138,8 @@ export class Decimal {
     } else {
       const paddedMantissa = mantissa.toString().padStart(PRECISION, "0");
       const trimmedMantissa = paddedMantissa.replace(trailingZeros, "");
-      return characteristic.toString() + "." + trimmedMantissa;
+      const slicedMantissa = trimmedMantissa.slice(0, 12);
+      return characteristic.toString() + "." + slicedMantissa;
     }
   }
 
