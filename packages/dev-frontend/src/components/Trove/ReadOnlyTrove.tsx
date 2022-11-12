@@ -5,8 +5,8 @@ import { LiquityStoreState } from "@liquity/lib-base";
 import { DisabledEditableRow } from "./Editor";
 import { useTroveView } from "./context/TroveViewContext";
 import { Icon } from "../Icon";
-import { COIN } from "../../strings";
-import { CollateralRatio } from "./CollateralRatio";
+import { Units } from "../../strings";
+import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
 
 const select = ({ trove, price }: LiquityStoreState) => ({ trove, price });
 
@@ -21,7 +21,6 @@ export const ReadOnlyTrove: React.FC = () => {
 
   const { trove, price } = useLiquitySelector(select);
 
-  // console.log("READONLY TROVE", trove.collateral.prettify(4));
   return (
     <Card>
       <Heading>Trove</Heading>
@@ -31,17 +30,17 @@ export const ReadOnlyTrove: React.FC = () => {
             label="Collateral"
             inputId="trove-collateral"
             amount={trove.collateral.prettify(4)}
-            unit="ETH"
+            unit={Units.ETH}
           />
 
           <DisabledEditableRow
             label="Debt"
             inputId="trove-debt"
             amount={trove.debt.prettify()}
-            unit={COIN}
+            unit={Units.COIN}
           />
 
-          <CollateralRatio value={trove.collateralRatio(price)} />
+          <CollateralRatioInfoLine value={trove.collateralRatio(price)} />
         </Box>
 
         <Flex variant="layout.actions">

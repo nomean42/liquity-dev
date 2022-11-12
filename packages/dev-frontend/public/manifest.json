@@ -1,11 +1,11 @@
 {
-  "short_name": "Liquity Dev UI",
-  "name": "Liquity Developer UI",
+  "short_name": "cp0x Liquity UI",
+  "name": "cp0x Liquity UI",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "favicon.ico",
       "sizes": "32x32",
-      "type": "image/png"
+      "type": "image/x-icon"
     }
   ],
   "start_url": ".",

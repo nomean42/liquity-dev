@@ -3,15 +3,19 @@ import { Button, Flex } from "theme-ui";
 
 import {
   Decimal,
-  Decimalish,
+  Difference,
   LiquityStoreState,
   LQTYStake,
-  LQTYStakeChange
+  LQTYStakeChange,
 } from "@liquity/lib-base";
 
-import { LiquityStoreUpdate, useLiquityReducer, useLiquitySelector } from "@liquity/lib-react";
+import {
+  LiquityStoreUpdate,
+  useLiquityReducer,
+  useLiquitySelector,
+} from "@liquity/lib-react";
 
-import { GT, COIN } from "../../strings";
+import { Units } from "../../strings";
 
 import { useStakingView } from "./context/StakingViewContext";
 import { StakingEditor } from "./StakingEditor";
@@ -21,37 +25,37 @@ import { ErrorDescription } from "../ErrorDescription";
 
 const init = ({ lqtyStake }: LiquityStoreState) => ({
   originalStake: lqtyStake,
-  editedLQTY: lqtyStake.stakedLQTY
+  editedLQTY: Decimal.ZERO,
 });
 
 type StakeManagerState = ReturnType<typeof init>;
 type StakeManagerAction =
   | LiquityStoreUpdate
   | { type: "revert" }
-  | { type: "setStake"; newValue: Decimalish };
+  | { type: "setStake"; newValue: Decimal };
 
-const reduce = (state: StakeManagerState, action: StakeManagerAction): StakeManagerState => {
-  // console.log(state);
-  // console.log(action);
-
+const reduce = (
+  state: StakeManagerState,
+  action: StakeManagerAction
+): StakeManagerState => {
   const { originalStake, editedLQTY } = state;
 
   switch (action.type) {
     case "setStake":
-      return { ...state, editedLQTY: Decimal.from(action.newValue) };
+      return { ...state, editedLQTY: action.newValue };
 
     case "revert":
-      return { ...state, editedLQTY: originalStake.stakedLQTY };
+      return { ...state, editedLQTY: Decimal.ZERO };
 
     case "updateStore": {
       const {
-        stateChange: { lqtyStake: updatedStake }
+        stateChange: { lqtyStake: updatedStake },
       } = action;
 
       if (updatedStake) {
         return {
           originalStake: updatedStake,
-          editedLQTY: updatedStake.apply(originalStake.whatChanged(editedLQTY))
+          editedLQTY: updatedStake.apply(originalStake.whatChanged(editedLQTY)),
         };
       }
     }
@@ -69,12 +73,16 @@ type StakingManagerActionDescriptionProps = {
 
 const StakingManagerActionDescription: React.FC<StakingManagerActionDescriptionProps> = ({
   originalStake,
-  change
+  change,
 }) => {
-  const stakeLQTY = change.stakeLQTY?.prettify().concat(" ", GT);
-  const unstakeLQTY = change.unstakeLQTY?.prettify().concat(" ", GT);
-  const collateralGain = originalStake.collateralGain.nonZero?.prettify(4).concat(" ETH");
-  const lusdGain = originalStake.lusdGain.nonZero?.prettify().concat(" ", COIN);
+  const stakeLQTY = change.stakeLQTY?.prettify().concat(" ", Units.GT);
+  const unstakeLQTY = change.unstakeLQTY?.prettify().concat(" ", Units.GT);
+  const collateralGain = originalStake.collateralGain.nonZero
+    ?.prettify(4)
+    .concat(" ETH");
+  const lusdGain = originalStake.lusdGain.nonZero
+    ?.prettify()
+    .concat(" ", Units.COIN);
 
   if (originalStake.isEmpty && stakeLQTY) {
     return (
@@ -117,49 +125,92 @@ const StakingManagerActionDescription: React.FC<StakingManagerActionDescriptionP
 };
 
 export const StakingManager: React.FC = () => {
-  const { dispatch: dispatchStakingViewAction } = useStakingView();
-  const [{ originalStake, editedLQTY }, dispatch] = useLiquityReducer(reduce, init);
+  const { dispatch: dispatchStakingViewAction, kind } = useStakingView();
+  const [{ originalStake, editedLQTY }, dispatch] = useLiquityReducer(
+    reduce,
+    init
+  );
   const lqtyBalance = useLiquitySelector(selectLQTYBalance);
+  const isKindStake = kind === "STAKE";
+  const { stakedLQTY } = originalStake;
 
-  const change = originalStake.whatChanged(editedLQTY);
-  const [validChange, description] = !change
-    ? [undefined, undefined]
-    : change.stakeLQTY?.gt(lqtyBalance)
-    ? [
+  const getValidChange = (): [
+    LQTYStakeChange<Decimal> | undefined,
+    React.ReactNode
+  ] => {
+    if (editedLQTY.isZero) {
+      return [undefined, undefined];
+    }
+
+    const isStakeTooMuch = isKindStake && editedLQTY.gt(lqtyBalance);
+    const isWithdrawTooMuch = !isKindStake && editedLQTY.gt(stakedLQTY);
+
+    if (isStakeTooMuch || isWithdrawTooMuch) {
+      return [
         undefined,
         <ErrorDescription>
-          The amount you're trying to stake exceeds your balance by{" "}
+          {`The amount you're trying to ${
+            isKindStake ? "stake" : "withdraw"
+          } exceeds your ${isKindStake ? "balance" : "stake"} by `}
           <Amount>
-            {change.stakeLQTY.sub(lqtyBalance).prettify()} {GT}
+            {Difference.between(
+              editedLQTY,
+              isKindStake ? lqtyBalance : stakedLQTY
+            )?.absoluteValue?.prettify()}{" "}
+            {Units.GT}
           </Amount>
           .
-        </ErrorDescription>
-      ]
-    : [change, <StakingManagerActionDescription originalStake={originalStake} change={change} />];
+        </ErrorDescription>,
+      ];
+    }
 
-  const makingNewStake = originalStake.isEmpty;
+    const change = isKindStake
+      ? originalStake.getStakeChange(editedLQTY)
+      : originalStake.getWithdrawChange(editedLQTY);
+
+    return change
+      ? [
+          change,
+          <StakingManagerActionDescription
+            originalStake={originalStake}
+            change={change}
+          />,
+        ]
+      : [undefined, undefined];
+  };
+  const [validChange, description] = getValidChange();
+
+  const actionTitle = isKindStake ? "Stake" : "Withdraw";
 
   return (
-    <StakingEditor title={"Staking"} {...{ originalStake, editedLQTY, dispatch }}>
-      {description ??
-        (makingNewStake ? (
-          <ActionDescription>Enter the amount of {GT} you'd like to stake.</ActionDescription>
-        ) : (
-          <ActionDescription>Adjust the {GT} amount to stake or withdraw.</ActionDescription>
-        ))}
-
+    <StakingEditor
+      {...{
+        stakedLQTY,
+        editedLQTY: isKindStake
+          ? stakedLQTY.add(editedLQTY)
+          : editedLQTY.gt(stakedLQTY)
+          ? Decimal.ZERO
+          : stakedLQTY.sub(editedLQTY),
+        dispatch,
+      }}
+    >
+      {description}
       <Flex variant="layout.actions">
         <Button
           variant="cancel"
-          onClick={() => dispatchStakingViewAction({ type: "cancelAdjusting" })}
+          onClick={() =>
+            dispatchStakingViewAction({ type: "cancelAdjusting", kind })
+          }
         >
           Cancel
         </Button>
 
         {validChange ? (
-          <StakingManagerAction change={validChange}>Confirm</StakingManagerAction>
+          <StakingManagerAction change={validChange}>
+            {actionTitle}
+          </StakingManagerAction>
         ) : (
-          <Button disabled>Confirm</Button>
+          <Button disabled>{actionTitle}</Button>
         )}
       </Flex>
     </StakingEditor>

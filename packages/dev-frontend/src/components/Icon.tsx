@@ -28,10 +28,17 @@ import {
   faHandPaper,
   faHeartbeat,
   faBars,
+  faLongArrowAltRight,
   faArrowDown
 } from "@fortawesome/free-solid-svg-icons";
-import { faClipboard, faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
+import {
+  faClipboard,
+  faQuestionCircle,
+} from "@fortawesome/free-regular-svg-icons";
+import {
+  FontAwesomeIcon,
+  FontAwesomeIconProps,
+} from "@fortawesome/react-fontawesome";
 
 library.add(
   faCircleNotch,
@@ -63,6 +70,7 @@ library.add(
   faHeartbeat,
   faBars,
   faQuestionCircle,
+  faLongArrowAltRight,
   faArrowDown
 );
 
@@ -77,7 +85,10 @@ const getIcon = (name: IconName): IconProp => {
   }
 };
 
-export type IconProps = Pick<FontAwesomeIconProps, "style" | "size" | "color" | "spin"> & {
+export type IconProps = Pick<
+  FontAwesomeIconProps,
+  "style" | "size" | "color" | "spin"
+> & {
   name: IconName;
 };
 

@@ -15,17 +15,27 @@ import { ActionDescription } from "../ActionDescription";
 import { useMyTransactionState } from "../Transaction";
 import { TroveAction } from "./TroveAction";
 import { useTroveView } from "./context/TroveViewContext";
-import { COIN } from "../../strings";
+import { Units } from "../../strings";
 import { Icon } from "../Icon";
 import { InfoIcon } from "../InfoIcon";
 import { LoadingOverlay } from "../LoadingOverlay";
-import { CollateralRatio } from "./CollateralRatio";
+import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
 import { EditableRow, StaticRow } from "./Editor";
 import { ExpensiveTroveChangeWarning, GasEstimationState } from "./ExpensiveTroveChangeWarning";
 import {
   selectForTroveChangeValidation,
   validateTroveChange
 } from "./validation/validateTroveChange";
+import { Units } from "../../strings";
+import { Icon } from "../Icon";
+import { LoadingOverlay } from "../LoadingOverlay";
+import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
+import { EditableRow } from "./Editor";
+import {
+  selectForTroveChangeValidation,
+  validateTroveChange,
+} from "./validation/validateTroveChange";
+import { TroveInfoLine } from "./TroveInfoLine";
 
 const selector = (state: LiquityStoreState) => {
   const { fees, price, accountBalance } = state;
@@ -33,7 +43,7 @@ const selector = (state: LiquityStoreState) => {
     fees,
     price,
     accountBalance,
-    validationContext: selectForTroveChangeValidation(state)
+    validationContext: selectForTroveChangeValidation(state),
   };
 };
 
@@ -63,6 +73,15 @@ export const Opening: React.FC = () => {
   const collateralMaxedOut = collateral.eq(maxCollateral);
   const collateralRatio =
     !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(price) : undefined;
+  const maxEth = accountBalance.gt(GAS_ROOM_ETH)
+    ? accountBalance.sub(GAS_ROOM_ETH)
+    : Decimal.ZERO;
+  const maxCollateral = collateral.add(maxEth);
+  const collateralMaxedOut = collateral.eq(maxCollateral);
+  const collateralRatio =
+    !collateral.isZero && !borrowAmount.isZero
+      ? trove.collateralRatio(price)
+      : undefined;
 
   const [troveChange, description] = validateTroveChange(
     EMPTY_TROVE,
@@ -99,7 +118,11 @@ export const Opening: React.FC = () => {
       <Heading>
         Trove
         {isDirty && !isTransactionPending && (
-          <Button variant="titleIcon" sx={{ ":enabled:hover": { color: "danger" } }} onClick={reset}>
+          <Button
+            variant="titleIcon"
+            sx={{ ":enabled:hover": { color: "danger" } }}
+            onClick={reset}
+          >
             <Icon name="history" size="lg" />
           </Button>
         )}
@@ -113,95 +136,38 @@ export const Opening: React.FC = () => {
           maxAmount={maxCollateral.toString()}
           maxedOut={collateralMaxedOut}
           editingState={editingState}
-          unit="ETH"
+          unit={Units.ETH}
           editedAmount={collateral.toString(4)}
-          setEditedAmount={(amount: string) => setCollateral(Decimal.from(amount))}
+          setEditedAmount={(amount: string) =>
+            setCollateral(Decimal.from(amount))
+          }
         />
 
         <EditableRow
           label="Borrow"
           inputId="trove-borrow-amount"
           amount={borrowAmount.prettify()}
-          unit={COIN}
+          unit={Units.COIN}
           editingState={editingState}
           editedAmount={borrowAmount.toString(2)}
-          setEditedAmount={(amount: string) => setBorrowAmount(Decimal.from(amount))}
-        />
-
-        <StaticRow
-          label="Liquidation Reserve"
-          inputId="trove-liquidation-reserve"
-          amount={`${LUSD_LIQUIDATION_RESERVE}`}
-          unit={COIN}
-          infoIcon={
-            <InfoIcon
-              tooltip={
-                <Card variant="tooltip" sx={{ width: "200px" }}>
-                  An amount set aside to cover the liquidator’s gas costs if your Trove needs to be
-                  liquidated. The amount increases your debt and is refunded if you close your Trove
-                  by fully paying off its net debt.
-                </Card>
-              }
-            />
+          setEditedAmount={(amount: string) =>
+            setBorrowAmount(Decimal.from(amount))
           }
         />
-
-        <StaticRow
-          label="Borrowing Fee"
-          inputId="trove-borrowing-fee"
-          amount={fee.prettify(2)}
-          pendingAmount={feePct.toString(2)}
-          unit={COIN}
-          infoIcon={
-            <InfoIcon
-              tooltip={
-                <Card variant="tooltip" sx={{ width: "240px" }}>
-                  This amount is deducted from the borrowed amount as a one-time fee. There are no
-                  recurring fees for borrowing, which is thus interest-free.
-                </Card>
-              }
-            />
-          }
+        <TroveInfoLine
+          fee={fee}
+          totalDebt={totalDebt}
+          isDirty={isDirty}
+          borrowingRate={feePct.toString(2)}
         />
-
-        <StaticRow
-          label="Total debt"
-          inputId="trove-total-debt"
-          amount={totalDebt.prettify(2)}
-          unit={COIN}
-          infoIcon={
-            <InfoIcon
-              tooltip={
-                <Card variant="tooltip" sx={{ width: "240px" }}>
-                  The total amount of LUSD your Trove will hold.{" "}
-                  {isDirty && (
-                    <>
-                      You will need to repay {totalDebt.sub(LUSD_LIQUIDATION_RESERVE).prettify(2)}{" "}
-                      LUSD to reclaim your collateral ({LUSD_LIQUIDATION_RESERVE.toString()} LUSD
-                      Liquidation Reserve excluded).
-                    </>
-                  )}
-                </Card>
-              }
-            />
-          }
-        />
-
-        <CollateralRatio value={collateralRatio} />
+        <CollateralRatioInfoLine value={collateralRatio} />
 
         {description ?? (
           <ActionDescription>
-            Start by entering the amount of ETH you'd like to deposit as collateral.
+            Start by entering the amount of ETH you'd like to deposit as
+            collateral.
           </ActionDescription>
         )}
-
-        <ExpensiveTroveChangeWarning
-          troveChange={stableTroveChange}
-          maxBorrowingRate={maxBorrowingRate}
-          borrowingFeeDecayToleranceMinutes={60}
-          gasEstimationState={gasEstimationState}
-          setGasEstimationState={setGasEstimationState}
-        />
 
         <Flex variant="layout.actions">
           <Button variant="cancel" onClick={handleCancelPressed}>

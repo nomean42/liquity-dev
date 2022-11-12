@@ -2,30 +2,80 @@ import { Theme, ThemeUIStyleObject } from "theme-ui";
 
 const baseColors = {
   blue: "#1542cd",
+  darkBlue: "#2a3145",
   purple: "#745ddf",
   cyan: "#2eb6ea",
+  lightCian: "#e6f6ff",
+  pinkCian: "#d4d9fc",
   green: "#28c081",
   yellow: "#fd9d28",
   red: "#dc2c10",
-  lightRed: "#ff755f"
+  lightLightRed: "#ff755f0d",
+  lightRed: "#ff755f",
+};
+
+const darkColors = {
+  blue: "#28e2e1",
+  darkBlue: "#1b1f1f",
+  purple: "#817eff",
+  cyan: "#2cfffe",
+  lightCian: "#062424",
+  pinkCian: "#0a3a3a",
+  green: "#28c081",
+  yellow: "#fd9d28",
+  red: "#dc2c10",
+  lightLightRed: "#611b12",
+  lightRed: "#ff755f",
 };
 
 const colors = {
   primary: baseColors.blue,
   secondary: baseColors.purple,
   accent: baseColors.cyan,
+  lightAccent: baseColors.lightCian,
+  pinkAccent: baseColors.pinkCian,
 
   success: baseColors.green,
   warning: baseColors.yellow,
   danger: baseColors.red,
+  lightDanger: baseColors.lightLightRed,
   dangerHover: baseColors.lightRed,
   info: baseColors.blue,
   invalid: "pink",
 
-  text: "#293147",
+  text: baseColors.darkBlue,
+  buttonText: "white",
   background: "white",
   muted: "#eaebed",
-  highlight: "#efeffe"
+  infoBorder: "#c7cede",
+  darkModeMain: baseColors.darkBlue,
+  darkModeSecondary: "white",
+
+  modes: {
+    dark: {
+      primary: darkColors.blue,
+      secondary: darkColors.purple,
+      accent: darkColors.cyan,
+      lightAccent: darkColors.lightCian,
+      pinkAccent: darkColors.pinkCian,
+
+      success: darkColors.green,
+      warning: darkColors.yellow,
+      danger: darkColors.red,
+      lightDanger: darkColors.lightLightRed,
+      dangerHover: darkColors.lightRed,
+      info: darkColors.blue,
+      invalid: "#4d2d40",
+
+      text: "#aab8bf",
+      buttonText: "black",
+      background: "black",
+      muted: "#111213",
+      infoBorder: "#144848",
+      darkModeMain: darkColors.darkBlue,
+      darkModeSecondary: "#aab8bf",
+    },
+  },
 };
 
 const buttonBase: ThemeUIStyleObject = {
@@ -33,7 +83,7 @@ const buttonBase: ThemeUIStyleObject = {
   alignItems: "center",
   justifyContent: "center",
 
-  ":enabled": { cursor: "pointer" }
+  ":enabled": { cursor: "pointer" },
 };
 
 const button: ThemeUIStyleObject = {
@@ -42,17 +92,20 @@ const button: ThemeUIStyleObject = {
   px: "32px",
   py: "12px",
 
-  color: "white",
+  color: "var(--theme-ui-colors-buttonText)",
   border: 1,
 
   fontWeight: "bold",
 
   ":disabled": {
-    opacity: 0.5
-  }
+    opacity: 0.5,
+  },
 };
 
-const buttonOutline = (color: string, hoverColor: string): ThemeUIStyleObject => ({
+const buttonOutline = (
+  color: string,
+  hoverColor: string
+): ThemeUIStyleObject => ({
   color,
   borderColor: color,
   background: "none",
@@ -60,8 +113,8 @@ const buttonOutline = (color: string, hoverColor: string): ThemeUIStyleObject =>
   ":enabled:hover": {
     color: "background",
     bg: hoverColor,
-    borderColor: hoverColor
-  }
+    borderColor: hoverColor,
+  },
 });
 
 const iconButton: ThemeUIStyleObject = {
@@ -75,8 +128,8 @@ const iconButton: ThemeUIStyleObject = {
 
   ":disabled": {
     color: "text",
-    opacity: 0.25
-  }
+    opacity: 0.25,
+  },
 };
 
 const cardHeadingFontSize = 18.7167;
@@ -88,7 +141,7 @@ const card: ThemeUIStyleObject = {
   position: "relative",
   mt: cardGapY,
   border: 1,
-  boxShadow: [1, null, 2]
+  boxShadow: [1, null, 2],
 };
 
 const infoCard: ThemeUIStyleObject = {
@@ -97,12 +150,13 @@ const infoCard: ThemeUIStyleObject = {
   padding: 3,
 
   borderColor: "rgba(122,199,240,0.4)",
-  background: "linear-gradient(200deg, #d4d9fc, #cae9f9)",
+  background:
+    "linear-gradient(200deg, var(--theme-ui-colors-pinkAccent), var(--theme-ui-colors-lightAccent))",
 
   h2: {
     mb: 2,
-    fontSize: cardHeadingFontSize
-  }
+    fontSize: cardHeadingFontSize,
+  },
 };
 
 const formBase: ThemeUIStyleObject = {
@@ -110,7 +164,7 @@ const formBase: ThemeUIStyleObject = {
   width: "auto",
   flexShrink: 0,
   padding: 2,
-  fontSize: 3
+  fontSize: 3,
 };
 
 const formCell: ThemeUIStyleObject = {
@@ -120,7 +174,7 @@ const formCell: ThemeUIStyleObject = {
   border: 1,
   borderColor: "muted",
   borderRadius: 0,
-  boxShadow: [1, 2]
+  boxShadow: [1, 2],
 };
 
 const overlay: ThemeUIStyleObject = {
@@ -129,7 +183,7 @@ const overlay: ThemeUIStyleObject = {
   left: 0,
   top: 0,
   width: "100%",
-  height: "100%"
+  height: "100%",
 };
 
 const modalOverlay: ThemeUIStyleObject = {
@@ -138,6 +192,11 @@ const modalOverlay: ThemeUIStyleObject = {
   left: 0,
   top: 0,
   width: "100vw",
+  height: "100vh",
+};
+
+const headerGradient: ThemeUIStyleObject = {
+  background: `linear-gradient(90deg, var(--theme-ui-colors-background), var(--theme-ui-colors-muted))`,
   height: "100vh"
 };
 
@@ -158,10 +217,10 @@ const theme: Theme = {
       '"Segoe UI"',
       "Roboto",
       '"Helvetica Neue"',
-      "sans-serif"
+      "sans-serif",
     ].join(", "),
     heading: "inherit",
-    monospace: "Menlo, monospace"
+    monospace: "Menlo, monospace",
   },
 
   fontSizes: [12, 14, 16, 20, 24, 32, 48, 64, 96],
@@ -172,25 +231,30 @@ const theme: Theme = {
 
     light: 200,
     medium: 500,
-    bold: 600
+    bold: 600,
   },
 
   lineHeights: {
     body: 1.5,
-    heading: 1.25
+    heading: 1.25,
   },
 
+  initialColorModeName: "light",
   colors,
 
   borders: [0, "1px solid", "2px solid"],
 
-  shadows: ["0", "0px 4px 8px rgba(41, 49, 71, 0.1)", "0px 8px 16px rgba(41, 49, 71, 0.1)"],
+  shadows: [
+    "0",
+    "0px 4px 8px rgba(41, 49, 71, 0.1)",
+    "0px 8px 16px rgba(41, 49, 71, 0.1)",
+  ],
 
   text: {
     address: {
       fontFamily: "monospace",
-      fontSize: 1
-    }
+      fontSize: 1,
+    },
   },
 
   buttons: {
@@ -208,14 +272,14 @@ const theme: Theme = {
 
     outline: {
       ...button,
-      ...buttonOutline("primary", "secondary")
+      ...buttonOutline("primary", "secondary"),
     },
 
     cancel: {
       ...button,
       ...buttonOutline("text", "text"),
 
-      opacity: 0.8
+      opacity: 0.8,
     },
 
     danger: {
@@ -226,26 +290,26 @@ const theme: Theme = {
 
       ":enabled:hover": {
         bg: "dangerHover",
-        borderColor: "dangerHover"
-      }
+        borderColor: "dangerHover",
+      },
     },
 
     icon: {
       ...iconButton,
       color: "primary",
-      ":enabled:hover": { color: "accent" }
+      ":enabled:hover": { color: "accent" },
     },
 
     dangerIcon: {
       ...iconButton,
       color: "danger",
-      ":enabled:hover": { color: "dangerHover" }
+      ":enabled:hover": { color: "dangerHover" },
     },
 
     titleIcon: {
       ...iconButton,
       color: "text",
-      ":enabled:hover": { color: "success" }
+      ":enabled:hover": { color: "success" },
     },
 
     close: {
@@ -275,14 +339,14 @@ const theme: Theme = {
 
         bg: "muted",
 
-        fontSize: cardHeadingFontSize
-      }
+        fontSize: cardHeadingFontSize,
+      },
     },
 
     info: {
       ...infoCard,
 
-      display: ["none", "block"]
+      display: ["none", "block"],
     },
 
     infoPopup: {
@@ -294,18 +358,28 @@ const theme: Theme = {
       left: 3,
       mt: "72px",
       height: "80%",
-      overflowY: "scroll"
+      overflowY: "scroll",
     },
 
     tooltip: {
+      padding: 2,
+
+      border: 1,
+      borderColor: "muted",
+      borderRadius: "4px",
+      bg: "background",
+      boxShadow: 2,
+
+      fontSize: 1,
+      color: "text",
       fontWeight: "body",
-      zIndex: 1
-    }
+      zIndex: 1,
+    },
   },
 
   forms: {
     label: {
-      ...formBase
+      ...formBase,
     },
 
     radioLabel: {
@@ -321,16 +395,16 @@ const theme: Theme = {
       ...formCell,
 
       textAlign: "center",
-      bg: "muted"
+      bg: "muted",
     },
 
     input: {
       ...formCell,
 
-      flex: 1
+      flex: 1,
     },
 
-    editor: {}
+    editor: {},
   },
 
   layout: {
@@ -340,6 +414,7 @@ const theme: Theme = {
       alignItems: "stretch",
 
       position: ["fixed", "relative"],
+      width: "100vw",
       top: 0,
       zIndex: 1,
 
@@ -347,7 +422,7 @@ const theme: Theme = {
       py: [2, "12px", "12px"],
 
       ...headerGradient,
-      boxShadow: [1, "none"]
+      boxShadow: [1, "none"],
     },
 
     footer: {
@@ -359,31 +434,31 @@ const theme: Theme = {
       px: 3,
       minHeight: "72px",
 
-      bg: "muted"
+      bg: "muted",
     },
 
     main: {
       width: "100%",
-      maxWidth: "1280px",
+      maxWidth: "1062px",
       mx: "auto",
       mt: ["40px", 0],
       mb: ["40px", "40px"],
-      px: cardGapX
+      px: cardGapX,
     },
 
     columns: {
       display: "flex",
       flexWrap: "wrap",
-      justifyItems: "center"
+      justifyItems: "center",
     },
 
     left: {
       pr: cardGapX,
-      width: ["100%", "58%"]
+      width: ["100%", "58%"],
     },
 
     right: {
-      width: ["100%", "42%"]
+      width: ["100%", "42%"],
     },
 
     actions: {
@@ -391,14 +466,14 @@ const theme: Theme = {
       mt: 2,
 
       button: {
-        ml: 2
-      }
+        ml: 2,
+      },
     },
 
     disabledOverlay: {
       ...overlay,
 
-      bg: "rgba(255, 255, 255, 0.5)"
+      bg: "rgba(255, 255, 255, 0.5)",
     },
 
     modalOverlay: {
@@ -408,12 +483,12 @@ const theme: Theme = {
 
       display: "flex",
       justifyContent: "center",
-      alignItems: "center"
+      alignItems: "center",
     },
 
     modal: {
       padding: 3,
-      width: ["100%", "40em"]
+      width: ["100%", "40em"],
     },
 
     infoOverlay: {
@@ -421,7 +496,7 @@ const theme: Theme = {
 
       display: ["block", "none"],
 
-      bg: "rgba(255, 255, 255, 0.8)"
+      bg: "rgba(255, 255, 255, 0.8)",
     },
 
     infoMessage: {
@@ -429,7 +504,7 @@ const theme: Theme = {
       justifyContent: "center",
       m: 3,
       alignItems: "center",
-      minWidth: "128px"
+      minWidth: "128px",
     },
 
     sidenav: {
@@ -440,7 +515,7 @@ const theme: Theme = {
       borderColor: "muted",
       mr: "25vw",
       height: "100%",
-      ...headerGradient
+      ...headerGradient,
     },
 
     badge: {
@@ -451,8 +526,8 @@ const theme: Theme = {
       backgroundColor: "muted",
       color: "slate",
       fontSize: 1,
-      fontWeight: "body"
-    }
+      fontWeight: "body",
+    },
   },
 
   styles: {
@@ -464,15 +539,15 @@ const theme: Theme = {
       height: "100%",
 
       "#root": {
-        height: "100%"
-      }
+        height: "100%",
+      },
     },
 
     a: {
       color: "primary",
       ":hover": { color: "accent" },
       textDecoration: "none",
-      fontWeight: "bold"
+      fontWeight: "bold",
     },
 
     progress: {
@@ -489,9 +564,9 @@ const theme: Theme = {
       textTransform: "uppercase",
       letterSpacing: "2px",
       width: ["100%", "auto"],
-      mt: [3, "auto"]
-    }
-  }
+      mt: [3, "auto"],
+    },
+  },
 };
 
 export default theme;

@@ -8,15 +8,15 @@ import {
   Decimal,
   Trove,
   LiquityStoreState,
-  LUSD_LIQUIDATION_RESERVE
+  LUSD_LIQUIDATION_RESERVE,
 } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { Units } from "../../strings";
 
 import { StaticRow } from "./Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
-import { CollateralRatio } from "./CollateralRatio";
+import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
 import { InfoIcon } from "../InfoIcon";
 
 type TroveEditorProps = {
@@ -26,7 +26,9 @@ type TroveEditorProps = {
   borrowingRate: Decimal;
   changePending: boolean;
   dispatch: (
-    action: { type: "setCollateral" | "setDebt"; newValue: Decimalish } | { type: "revert" }
+    action:
+      | { type: "setCollateral" | "setDebt"; newValue: Decimalish }
+      | { type: "revert" }
   ) => void;
 };
 
@@ -38,15 +40,22 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
   edited,
   fee,
   borrowingRate,
-  changePending
+  changePending,
 }) => {
   const { price } = useLiquitySelector(select);
 
   const feePct = new Percent(borrowingRate);
 
-  const originalCollateralRatio = !original.isEmpty ? original.collateralRatio(price) : undefined;
-  const collateralRatio = !edited.isEmpty ? edited.collateralRatio(price) : undefined;
-  const collateralRatioChange = Difference.between(collateralRatio, originalCollateralRatio);
+  const originalCollateralRatio = !original.isEmpty
+    ? original.collateralRatio(price)
+    : undefined;
+  const collateralRatio = !edited.isEmpty
+    ? edited.collateralRatio(price)
+    : undefined;
+  const collateralRatioChange = Difference.between(
+    collateralRatio,
+    originalCollateralRatio
+  );
 
   return (
     <Card>
@@ -57,24 +66,30 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           label="Collateral"
           inputId="trove-collateral"
           amount={edited.collateral.prettify(4)}
-          unit="ETH"
+          unit={Units.ETH}
         />
 
-        <StaticRow label="Debt" inputId="trove-debt" amount={edited.debt.prettify()} unit={COIN} />
+        <StaticRow
+          label="Debt"
+          inputId="trove-debt"
+          amount={edited.debt.prettify()}
+          unit={Units.COIN}
+        />
 
         {original.isEmpty && (
           <StaticRow
             label="Liquidation Reserve"
             inputId="trove-liquidation-reserve"
             amount={`${LUSD_LIQUIDATION_RESERVE}`}
-            unit={COIN}
+            unit={Units.COIN}
             infoIcon={
               <InfoIcon
                 tooltip={
                   <Card variant="tooltip" sx={{ width: "200px" }}>
-                    An amount set aside to cover the liquidator’s gas costs if your Trove needs to be
-                    liquidated. The amount increases your debt and is refunded if you close your
-                    Trove by fully paying off its net debt.
+                    An amount set aside to cover the liquidator’s gas costs if
+                    your Trove needs to be liquidated. The amount increases your
+                    debt and is refunded if you close your Trove by fully paying
+                    off its net debt.
                   </Card>
                 }
               />
@@ -87,20 +102,24 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           inputId="trove-borrowing-fee"
           amount={fee.toString(2)}
           pendingAmount={feePct.toString(2)}
-          unit={COIN}
+          unit={Units.COIN}
           infoIcon={
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "240px" }}>
-                  This amount is deducted from the borrowed amount as a one-time fee. There are no
-                  recurring fees for borrowing, which is thus interest-free.
+                  This amount is deducted from the borrowed amount as a one-time
+                  fee. There are no recurring fees for borrowing, which is thus
+                  interest-free.
                 </Card>
               }
             />
           }
         />
 
-        <CollateralRatio value={collateralRatio} change={collateralRatioChange} />
+        <CollateralRatioInfoLine
+          value={collateralRatio}
+          change={collateralRatioChange}
+        />
 
         {children}
       </Box>

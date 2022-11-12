@@ -1,4 +1,4 @@
-import { Decimal, Decimalish } from "./Decimal";
+import { Decimal, Decimalish, Difference } from "./Decimal";
 
 /**
  * Represents the change between two states of an LQTY Stake.
@@ -9,9 +9,9 @@ export type LQTYStakeChange<T> =
   | { stakeLQTY: T; unstakeLQTY?: undefined }
   | { stakeLQTY?: undefined; unstakeLQTY: T; unstakeAllLQTY: boolean };
 
-/** 
+/**
  * Represents a user's LQTY stake and accrued gains.
- * 
+ *
  * @remarks
  * Returned by the {@link ReadableLiquity.getLQTYStake | getLQTYStake()} function.
 
@@ -28,14 +28,22 @@ export class LQTYStake {
   readonly lusdGain: Decimal;
 
   /** @internal */
-  constructor(stakedLQTY = Decimal.ZERO, collateralGain = Decimal.ZERO, lusdGain = Decimal.ZERO) {
+  constructor(
+    stakedLQTY = Decimal.ZERO,
+    collateralGain = Decimal.ZERO,
+    lusdGain = Decimal.ZERO
+  ) {
     this.stakedLQTY = stakedLQTY;
     this.collateralGain = collateralGain;
     this.lusdGain = lusdGain;
   }
 
   get isEmpty(): boolean {
-    return this.stakedLQTY.isZero && this.collateralGain.isZero && this.lusdGain.isZero;
+    return (
+      this.stakedLQTY.isZero &&
+      this.collateralGain.isZero &&
+      this.lusdGain.isZero
+    );
   }
 
   /** @internal */
@@ -63,19 +71,35 @@ export class LQTYStake {
    *
    * @returns An object representing the change, or `undefined` if the staked amounts are equal.
    */
-  whatChanged(thatStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined {
+  whatChanged(
+    thatStakedLQTY: Decimalish
+  ): LQTYStakeChange<Decimal> | undefined {
     thatStakedLQTY = Decimal.from(thatStakedLQTY);
 
     if (thatStakedLQTY.lt(this.stakedLQTY)) {
       return {
         unstakeLQTY: this.stakedLQTY.sub(thatStakedLQTY),
-        unstakeAllLQTY: thatStakedLQTY.isZero
+        unstakeAllLQTY: thatStakedLQTY.isZero,
       };
     }
 
     if (thatStakedLQTY.gt(this.stakedLQTY)) {
       return { stakeLQTY: thatStakedLQTY.sub(this.stakedLQTY) };
     }
+  }
+
+  getStakeChange(diffStakedLQTY: Decimal): LQTYStakeChange<Decimal> {
+    return { stakeLQTY: diffStakedLQTY };
+  }
+
+  getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> {
+    return {
+      unstakeLQTY: Decimal.from(diffStakedLQTY),
+      unstakeAllLQTY: !!Difference.between(
+        this.stakedLQTY,
+        diffStakedLQTY
+      ).absoluteValue?.lt(Decimal.from(0.01)),
+    };
   }
 
   /**

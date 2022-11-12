@@ -4,7 +4,7 @@ import { Text, Flex, Box, Heading } from "theme-ui";
 import { Decimal, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN, GT } from "../strings";
+import { Units } from "../strings";
 import { useLiquity } from "../hooks/LiquityContext";
 import { shortenAddress } from "../utils/shortenAddress";
 
@@ -42,9 +42,9 @@ export const UserAccount: React.FC = () => {
         <Icon name="wallet" size="lg" />
 
         {([
-          ["ETH", accountBalance],
-          [COIN, Decimal.from(lusdBalance || 0)],
-          [GT, Decimal.from(lqtyBalance)],
+          [Units.ETH, accountBalance],
+          [Units.COIN, lusdBalance],
+          [Units.GT, lqtyBalance],
           ["bLUSD", Decimal.from(bLusdBalance || 0)]
         ] as const).map(([currency, balance], i) => (
           <Flex key={i} sx={{ ml: 3, flexDirection: "column" }}>

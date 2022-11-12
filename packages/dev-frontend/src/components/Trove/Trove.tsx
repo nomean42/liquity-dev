@@ -9,7 +9,7 @@ import { useTroveView } from "./context/TroveViewContext";
 import { LiquidatedTrove } from "./LiquidatedTrove";
 import { Decimal } from "@liquity/lib-base";
 
-export const Trove: React.FC = props => {
+export const Trove: React.FC = (props) => {
   const { view } = useTroveView();
 
   switch (view) {
@@ -21,7 +21,13 @@ export const Trove: React.FC = props => {
       return <Adjusting {...props} />;
     }
     case "CLOSING": {
-      return <TroveManager {...props} collateral={Decimal.ZERO} debt={Decimal.ZERO} />;
+      return (
+        <TroveManager
+          {...props}
+          collateral={Decimal.ZERO}
+          debt={Decimal.ZERO}
+        />
+      );
     }
     case "OPENING": {
       return <Opening {...props} />;

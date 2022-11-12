@@ -136,13 +136,13 @@ export class Decimal {
     // (undocumented)
     pow(exponent: number): Decimal;
     // (undocumented)
-    prettify(precision?: number): string;
+    prettify(precision?: number, save?: boolean): string;
     // (undocumented)
     shorten(): string;
     // (undocumented)
     sub(subtrahend: Decimalish): Decimal;
     // (undocumented)
-    toString(precision?: number): string;
+    toString(precision?: number, save?: boolean): string;
     // (undocumented)
     static readonly ZERO: Decimal;
     // (undocumented)
@@ -312,6 +312,10 @@ export class LQTYStake {
     apply(change: LQTYStakeChange<Decimalish> | undefined): Decimal;
     readonly collateralGain: Decimal;
     equals(that: LQTYStake): boolean;
+    // (undocumented)
+    getStakeChange(diffStakedLQTY: Decimal): LQTYStakeChange<Decimal>;
+    // (undocumented)
+    getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal>;
     // (undocumented)
     get isEmpty(): boolean;
     readonly lusdGain: Decimal;
@@ -597,6 +601,10 @@ export class StabilityDeposit {
     readonly currentLUSD: Decimal;
     equals(that: StabilityDeposit): boolean;
     readonly frontendTag: string;
+    // (undocumented)
+    getDepositChange(thatLUSD: Decimalish): StabilityDepositChange<Decimal> | undefined;
+    // (undocumented)
+    getWithdrawChange(thatLUSD: Decimalish): StabilityDepositChange<Decimal> | undefined;
     readonly initialLUSD: Decimal;
     // (undocumented)
     get isEmpty(): boolean;
