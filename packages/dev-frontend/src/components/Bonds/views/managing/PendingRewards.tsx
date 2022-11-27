@@ -14,7 +14,6 @@ export const PendingRewards: React.FC<{ open?: boolean }> = ({ open = false }) =
 
       <Flex>
         {lpRewards?.map(reward => {
-          console.log(reward, 1);
           return (
             <StaticRow
               amount={reward.amount.shorten()}

@@ -8,6 +8,8 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/dev-frontend/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages/lib-base/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/lib-base/temp" />
+      <excludeFolder url="file://$MODULE_DIR$/.yarn" />
+      <excludeFolder url="file://$MODULE_DIR$/.vscode" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

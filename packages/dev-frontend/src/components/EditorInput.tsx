@@ -99,7 +99,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
 
   const onMaxClick = useCallback(
     (event) => {
-      setInputChange(maxAmount.toString(undefined, true));
+      setInputChange(maxAmount.toString());
       event.stopPropagation();
     },
     [maxAmount, setInputChange]

@@ -255,6 +255,7 @@ export const Adjusting: React.FC = () => {
               transactionId={TRANSACTION_ID}
               change={troveChange}
               maxBorrowingRate={maxBorrowingRate}
+              borrowingFeeDecayToleranceMinutes={60}
             >
               Confirm
             </TroveAction>

@@ -68,6 +68,7 @@ export const Yield: React.FC = () => {
             </Paragraph>
           </Card>
         }
+        maxWidth="580px"
       />
     </Badge>
   );

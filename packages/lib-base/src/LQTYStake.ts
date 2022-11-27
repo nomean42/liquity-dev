@@ -88,10 +88,16 @@ export class LQTYStake {
     }
   }
 
+  /**
+   * @return {Object}
+   */
   getStakeChange(diffStakedLQTY: Decimal): LQTYStakeChange<Decimal> {
     return { stakeLQTY: diffStakedLQTY };
   }
 
+  /**
+   * @return {Object}
+   */
   getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> {
     return {
       unstakeLQTY: Decimal.from(diffStakedLQTY),

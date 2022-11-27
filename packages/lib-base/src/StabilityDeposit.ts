@@ -110,6 +110,9 @@ export class StabilityDeposit {
     }
   }
 
+  /**
+   * @return {Object}
+   */
   getDepositChange(
     thatLUSD: Decimalish
   ): StabilityDepositChange<Decimal> | undefined {
@@ -117,6 +120,9 @@ export class StabilityDeposit {
     return { depositLUSD: thatLUSD };
   }
 
+  /**
+   * @return {Object}
+   */
   getWithdrawChange(
     thatLUSD: Decimalish
   ): StabilityDepositChange<Decimal> | undefined {

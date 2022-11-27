@@ -17,20 +17,10 @@ import { TroveAction } from "./TroveAction";
 import { useTroveView } from "./context/TroveViewContext";
 import { Units } from "../../strings";
 import { Icon } from "../Icon";
-import { InfoIcon } from "../InfoIcon";
-import { LoadingOverlay } from "../LoadingOverlay";
-import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
-import { EditableRow, StaticRow } from "./Editor";
-import { ExpensiveTroveChangeWarning, GasEstimationState } from "./ExpensiveTroveChangeWarning";
-import {
-  selectForTroveChangeValidation,
-  validateTroveChange
-} from "./validation/validateTroveChange";
-import { Units } from "../../strings";
-import { Icon } from "../Icon";
 import { LoadingOverlay } from "../LoadingOverlay";
 import { CollateralRatioInfoLine } from "./CollateralRatioInfoLine";
 import { EditableRow } from "./Editor";
+import { ExpensiveTroveChangeWarning, GasEstimationState } from "./ExpensiveTroveChangeWarning";
 import {
   selectForTroveChangeValidation,
   validateTroveChange,
@@ -70,18 +60,9 @@ export const Opening: React.FC = () => {
   const maxCollateral = accountBalance.gt(GAS_ROOM_ETH)
     ? accountBalance.sub(GAS_ROOM_ETH)
     : Decimal.ZERO;
-  const collateralMaxedOut = collateral.eq(maxCollateral);
   const collateralRatio =
     !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(price) : undefined;
-  const maxEth = accountBalance.gt(GAS_ROOM_ETH)
-    ? accountBalance.sub(GAS_ROOM_ETH)
-    : Decimal.ZERO;
-  const maxCollateral = collateral.add(maxEth);
   const collateralMaxedOut = collateral.eq(maxCollateral);
-  const collateralRatio =
-    !collateral.isZero && !borrowAmount.isZero
-      ? trove.collateralRatio(price)
-      : undefined;
 
   const [troveChange, description] = validateTroveChange(
     EMPTY_TROVE,
@@ -168,6 +149,14 @@ export const Opening: React.FC = () => {
             collateral.
           </ActionDescription>
         )}
+
+        <ExpensiveTroveChangeWarning
+          troveChange={stableTroveChange}
+          maxBorrowingRate={maxBorrowingRate}
+          borrowingFeeDecayToleranceMinutes={60}
+          gasEstimationState={gasEstimationState}
+          setGasEstimationState={setGasEstimationState}
+        />
 
         <Flex variant="layout.actions">
           <Button variant="cancel" onClick={handleCancelPressed}>

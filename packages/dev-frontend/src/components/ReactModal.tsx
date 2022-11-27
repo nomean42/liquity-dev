@@ -11,9 +11,13 @@ const modalStyle = {
     transform: "translate(-50%, -50%)",
     maxWidth: "620px",
     width: "580px",
-    maxHeight: "94vh"
+    maxHeight: "94vh",
+    background: "var(--theme-ui-colors-background)"
   },
-  overlay: { zIndex: 2 }
+  overlay: {
+    zIndex: 2,
+    background: "var(--theme-ui-colors-infoBorderLight)",
+  }
 };
 
 type ModalProps = {

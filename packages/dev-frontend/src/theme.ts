@@ -48,6 +48,7 @@ const colors = {
   background: "white",
   muted: "#eaebed",
   infoBorder: "#c7cede",
+  infoBorderLight: "#c7cedeb3",
   darkModeMain: baseColors.darkBlue,
   darkModeSecondary: "white",
 
@@ -72,6 +73,7 @@ const colors = {
       background: "black",
       muted: "#111213",
       infoBorder: "#144848",
+      infoBorderLight: "#144848b3",
       darkModeMain: darkColors.darkBlue,
       darkModeSecondary: "#aab8bf",
     },
@@ -192,16 +194,11 @@ const modalOverlay: ThemeUIStyleObject = {
   left: 0,
   top: 0,
   width: "100vw",
-  height: "100vh",
-};
-
-const headerGradient: ThemeUIStyleObject = {
-  background: `linear-gradient(90deg, var(--theme-ui-colors-background), var(--theme-ui-colors-muted))`,
   height: "100vh"
 };
 
 const headerGradient: ThemeUIStyleObject = {
-  background: `linear-gradient(90deg, ${colors.background}, ${colors.muted})`
+  background: `linear-gradient(90deg, var(--theme-ui-colors-background), var(--theme-ui-colors-muted))`,
 };
 
 const theme: Theme = {
@@ -439,7 +436,7 @@ const theme: Theme = {
 
     main: {
       width: "100%",
-      maxWidth: "1062px",
+      maxWidth: "1280px",
       mx: "auto",
       mt: ["40px", 0],
       mb: ["40px", "40px"],
@@ -473,7 +470,7 @@ const theme: Theme = {
     disabledOverlay: {
       ...overlay,
 
-      bg: "rgba(255, 255, 255, 0.5)",
+      bg: "muted",
     },
 
     modalOverlay: {
@@ -489,6 +486,7 @@ const theme: Theme = {
     modal: {
       padding: 3,
       width: ["100%", "40em"],
+      bg: "muted",
     },
 
     infoOverlay: {
@@ -496,7 +494,7 @@ const theme: Theme = {
 
       display: ["block", "none"],
 
-      bg: "rgba(255, 255, 255, 0.8)",
+      bg: "background",
     },
 
     infoMessage: {

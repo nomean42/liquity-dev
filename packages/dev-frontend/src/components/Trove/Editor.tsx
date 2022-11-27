@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Text, Flex, Label, Input, SxProp, Button, ThemeUICSSProperties } from "theme-ui";
 
 import { Icon } from "../Icon";
+import { Units } from "../../strings";
 
 type RowProps = SxProp & {
   label: string | React.ReactNode;
@@ -63,11 +64,11 @@ const PendingAmount: React.FC<PendingAmountProps & SxProp> = ({ sx, value }) => 
   </Text>
 );
 
-type StaticAmountsProps = {
+export type StaticAmountsProps = {
   inputId?: string;
   labelledBy?: string;
-  amount?: string;
-  unit?: string;
+  amount?: string | React.ReactNode;
+  unit?: Units | string;
   color?: string;
   pendingAmount?: string;
   pendingColor?: string;

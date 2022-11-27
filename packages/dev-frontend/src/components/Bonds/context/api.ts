@@ -177,7 +177,7 @@ const cacheCurveLpApy = async (): Promise<void> => {
       await window.fetch("https://api.curve.fi/api/getPools/ethereum/factory-crypto")
     ).json()) as CurvePoolData;
 
-    const curvePoolDetailsResponse = (await await (
+    const curvePoolDetailsResponse = (await (
       await window.fetch("https://api.curve.fi/api/getFactoryAPYs?version=crypto")
     ).json()) as CurvePoolDetails;
 

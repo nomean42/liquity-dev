@@ -125,7 +125,7 @@ export const BondsTable: React.FC = () => {
           </Grid>
         )}
         <Flex variant="layout.actions" mt={3}>
-          <Link to="/bonds/pending" m={0} p={0}>
+          <Link to="/bonds" m={0} p={0}>
             <Button variant="primary">Go to bonds</Button>
           </Link>
         </Flex>
